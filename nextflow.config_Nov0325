@@ -1,0 +1,259 @@
+// =================================================================
+// nextflow.config is the main configuration script for a nextflow pipeline
+// Should contain the following sections:
+        // A manifest for defining workflow metadata
+        // Mandated minimal version of Nextflow required to run pipeline
+        // Default workflow parameter definitions
+        // Shell behaviour settings for the workflow
+        // Execution reports
+        // Configuration profiles
+        // Default resource definitions for processes
+
+// Examples are included for each section. Remove them and replace
+// with project-specific code. For more information see:
+// https://www.nextflow.io/docs/latest/index.html.
+//
+// ===================================================================
+
+// Define some metadata for publishing pipeline on GitHub
+// See https://www.nextflow.io/docs/latest/config.html#scope-manifest
+// TODO update this for ONT pipeline once named
+manifest {
+        author = 'Nandan Deshpande'
+        name = 'Retrotransposon Ensemble pipeline'
+        description = 'Identification of RT elements using multiple tools'
+        homePage = ''
+}
+
+
+// Mandate a minimum version of nextflow required to run the pipeline
+// See https://www.nextflow.io/docs/latest/config.html#nextflow-version
+nextflowVersion = '!>=20.07.1'
+
+env {
+  SINGULARITY_CACHEDIR       = "${System.getenv('SINGULARITY_CACHEDIR')}"
+  NXF_SINGULARITY_CACHEDIR   = "${System.getenv('NXF_SINGULARITY_CACHEDIR')}"
+  SINGULARITY_TMPDIR         = "${System.getenv('SINGULARITY_TMPDIR')}"
+  SINGULARITY_MOUNT_TIMEOUT  = "${System.getenv('SINGULARITY_MOUNT_TIMEOUT') ?: '900'}"
+}
+
+
+
+// Set default workflow parameters
+// See https://www.nextflow.io/docs/latest/config.html#scope-params
+params {
+        help    = false
+        outdir  = 'results'
+        input_directory = false
+        samplesheet     = false
+	input_contigs_directory = false 
+
+	// RetroNet
+	//masterpath='/scratch/ew19/nandan/tools/RetroNet_optimiseCode_collateAndSplit/RetroNet'
+
+	// New masterpath as defined in Nov25
+	masterpath='/scratch/ew19/nandan/nextflow/bitbucket_RUNS_START_Nov2025/retrobiome_nf/RetroNet_masterpath/RetroNet'
+
+}
+
+
+// Autodetect relevant Singularity env variables
+singularity {
+        enabled = true
+        autoMounts = true
+        autoCleanUp = true
+}
+
+
+process {
+        // Set default resources for all processes
+        //project = "${params.gadi_account}"
+        cpus = 1
+        memory = 4.Gb
+        cache = 'lenient'
+        //module = 'singularity'
+        //storage = "${params.gadi_storage}"
+
+        // Set process specific resources
+        // See https://www.nextflow.io/docs/latest/config.html?highlight=withname#scope-process
+        //withName: 'check_input' {
+        //        executor = 'local'
+        //}
+
+}
+
+
+process {
+
+	withName: 'RetroNet_step1_CleanBAM_QCBAM_normal' {
+                executor = 'pbspro'
+                cpus = 1
+                memory = 192.GB
+                time = 36.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=24:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+	
+
+
+        }
+
+	withName: 'RetroNet_step1_RetroDiscover_normal' {
+                executor = 'pbspro'
+                cpus = 2
+                memory = 128.GB
+                time = 36.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=24:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+
+        }
+
+	withName: 'RetroNet_step1_afterRetroDSteps3T6_normal' {
+                executor = 'pbspro'
+                cpus = 1
+                memory = 144.GB
+                time = 48.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=48:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+
+        }
+
+
+	withName: 'RetroNet_generate_control' {
+                executor = 'pbspro'
+                cpus = 1
+                memory = 16.GB
+                time = 24.h
+                queue = 'normalbw'         // <--- specify queue name here
+	
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=16:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+
+        }
+
+
+	// Split tumor files
+	withName: 'collate_and_split_tumor_files' {
+                executor = 'pbspro'
+                cpus = 1
+                memory = 144.GB
+                time = 48.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=48:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+        }
+
+	withName: 'sort_index_split_files' {
+                executor = 'pbspro'
+                cpus = 16
+                memory = 144.GB
+                time = 36.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=24:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+
+        }
+
+	withName: 'RetroNet_step1_CleanBAM_QCBAM_tumor' {
+                executor = 'pbspro'
+                cpus = 1
+                memory = 144.GB
+                time = 36.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=24:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+
+        }
+
+
+        withName: 'RetroNet_step1_RetroDiscover_tumor' {
+                executor = 'pbspro'
+                cpus = 2
+                memory = 144.GB
+                time = 36.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=24:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+
+        }
+
+	withName: 'RetroNet_step1_afterRetroDSteps3T6_tumor' {
+                executor = 'pbspro'
+                cpus = 1
+                memory = 96.GB
+                time = 48.h
+                queue = 'normalbw'         // <--- specify queue name here
+
+		clusterOptions = {
+    "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=48:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+        }
+
+
+        }
+
+
+	withName: 'RN_step2_7a7b_CombineStrand01' {
+                executor = 'pbspro'
+                cpus = 1
+		//gpus = 1
+		//cpus = 12
+                memory = 32.GB
+                time = 48.h	
+                //queue = 'gpuvolta'         // <--- specify queue name here
+		queue = 'normalbw'
+			
+
+		//clusterOptions = {
+   // 			"-l ncpus=${task.cpus},ngpus=${task.gpus},mem=${task.memory.toMega()}MB,walltime=48:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+ // }
+		clusterOptions = {
+                        "-l ncpus=${task.cpus},mem=${task.memory.toMega()}MB,walltime=48:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+  }
+
+
+		
+        }
+
+	withName: 'RN_step2_last_GPU_step' {
+                executor = 'pbspro'
+                cpus = 12
+                gpus = 1
+                memory = 128.GB
+                time = 36.h
+                queue = 'gpuvolta'         // <--- specify queue name here
+
+		clusterOptions = {
+  			  "-l ncpus=${task.cpus},ngpus=${task.gpus},mem=${task.memory.toMega()}MB,walltime=24:00:00,storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19"
+  }
+	
+
+        }
+
+
+}
+
+

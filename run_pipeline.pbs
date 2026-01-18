@@ -1,0 +1,67 @@
+#!/bin/bash
+
+#PBS -N RNet_90X_0Pt021.csv
+#PBS -P xw67
+#PBS -q normalbw
+#PBS -l ncpus=1
+#PBS -l mem=4GB
+#PBS -l walltime=48:00:00
+#PBS -M ndeshpande@ccia.org.au
+#PBS -m ae
+#PBS -j oe
+#PBS -l storage=gdata/ew19+gdata/ug9+gdata/if89+scratch/xw67+scratch/ew19
+
+
+# Load nextflow module
+module load java/jdk-17.0.2 nextflow/24.04.1
+
+cd $PBS_O_WORKDIR
+
+mkdir -p cache_dirs/{singularity_cache,nextflow_singularity_cache,singularity_temp}
+
+export CACHE_BASE=$(pwd)/cache_dirs
+export SINGULARITY_CACHEDIR="$CACHE_BASE/singularity_cache"
+export NXF_SINGULARITY_CACHEDIR="$CACHE_BASE/nextflow_singularity_cache"
+export SINGULARITY_TMPDIR="$CACHE_BASE/singularity_temp"
+
+export SINGULARITY_MOUNT_TIMEOUT=900
+export NXF_JAVA_OPTIONS="-Xmx120G"  # Adjust as needed
+
+#-with-dag dag.png 
+
+#OUTROOT="bwa1_whitelist_06AndPt1"
+#OUTROOT="oncoanalyserRef_redux_noCollate"
+#OUTROOT="refinedApproachHG008_Pt02Pt06"
+#OUTROOT="refinedApproachHG008_Pt2Pt5Pt7"
+#OUTROOT="samplesheet_90X_0Pt060Pt1"
+OUTROOT="samplesheet_90X_0Pt021"
+OUTDIR="${OUTROOT}"
+mkdir -p "$OUTDIR"
+
+
+#SAMPLES_FILE="samplesheet_03-0056.csv"
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/RetroNet_refine_Nov25/create_small_chrSpecific_subset_bams/030056/samplesheet_chr13_21.csv"
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025/samplesheets/oncoanalyser_redux.csv"
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025/samplesheets/oncoanalyser_redux_subset_chr19_22.csv"
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025/samplesheets/oncoanalyser_redux_spiked_REMAPPED_whitelist_bwa1_vafs.csv"
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025/samplesheets/oncoanalyser_redux_spiked_REMAPPED_whitelist_bwa1_vafs_1And02.csv"
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025/samplesheets/oncoanalyser_redux_spiked_REMAPPED_whitelist_bwa1_vafs_06AndPt1.csv"
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025_refinedApproach/samplesheets/oncoanalyserRef_xTea_totalRecall_displaced_L1.events.displaced_HG008.csv"
+
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025_refinedApproach/samplesheets/oncoanalyserRef_xTea_totalRecall_displaced_L1.events.displaced_HG008_Pt02Pt06.csv"
+
+#SAMPLES_FILE="/scratch/ew19/nandan/tools/bamsurgeon_spiking_Nov2025_refinedApproach/samplesheets/oncoanalyserRef_xTea_totalRecall_displaced_L1.events.displaced_HG008_0Pt257.csv"
+
+#SAMPLES_FILE="/scratch/ew19/nandan/nextflow/bitbucket_RUNS_START_JUNE2025/run_oncoanalyser/iter2_check_90X_unmodified_bam/samplesheet_xTea_tR_T_90x.noUR_spiked.7.csv"
+
+#SAMPLES_FILE="samplesheet_90X_0Pt060Pt1.csv"
+#SAMPLES_FILE="samplesheet_90X_0Pt30Pt5.csv"
+SAMPLES_FILE="samplesheet_90X_0Pt021.csv"
+
+nextflow run main.nf -resume --samples "$SAMPLES_FILE" \
+	-with-trace "${OUTDIR}/trace.tsv" \
+  	-with-report "${OUTDIR}/report.html" \
+  	-with-timeline "${OUTDIR}/timeline.html"
+
+
+

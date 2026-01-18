@@ -1,0 +1,2 @@
+sample_id,tumor_path,normal_path,tumor_bai_path,normal_bai_path,purity
+03-0056_311025_NoCollate,/scratch/ew19/nandan/datasets/for_RNet_301025/2V9LJETZ_T_RUC236PW_W.redux.bam,/scratch/ew19/nandan/datasets/for_RNet_301025/2V9LJETZ_G_2WKZ5073_W.redux.bam,/scratch/ew19/nandan/datasets/for_RNet_301025/2V9LJETZ_T_RUC236PW_W.redux.bam.bai,/scratch/ew19/nandan/datasets/for_RNet_301025/2V9LJETZ_G_2WKZ5073_W.redux.bam.bai,0.47

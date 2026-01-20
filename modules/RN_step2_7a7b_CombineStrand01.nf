@@ -24,7 +24,9 @@ script:
   ver=3
   hg=hg38
   gpu_partition="N"
-  cutoff=0.99
+  
+  # Changed on 200126 from cutoff=0.99 ; in retroNet paper it was 0.95 but again optimal was suggested to be at 0.8 -Check and confirm
+  cutoff=0.80
  
   subject=${sample_id}
 
@@ -86,7 +88,6 @@ singularity exec -B \${outpath},\${tmppath},${params.masterpath} ${params.master
 cont=normal
 partition_name=tiny
 gpu_partition=N
-cutoff=0.99
 
 
 #8_VisCoding LINE
@@ -132,8 +133,8 @@ done
 # Strand 0 #
 split -l \${split_row} \${outpath}/\${sub}/calls_\${ver}/\${sub}.\${TEclass}.0.calls \${sub}.\${TEclass}.calls_\${ver}.0
 
-for file in \${sub}.\${TEclass}.calls_\${ver}.1*; do
-
+#Changed on 200126 from - for file in \${sub}.\${TEclass}.calls_\${ver}.1*; do
+for file in \${sub}.\${TEclass}.calls_\${ver}.0*; do
 	singularity exec -B \${outpath},\${tmppath},${params.masterpath} ${params.masterpath}/pipeline/RetroNet.sif \\
                 \${outpath}/\${sub}/script/9_DrawPNG.sh -o \${outpath} -j \${sub} -m ${params.masterpath} -g \${hg} -i \${file} -t \${TEclass} -f \${TEfamily} -v \${ver} -s 0 -l candidate
 

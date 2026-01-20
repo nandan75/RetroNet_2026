@@ -23,7 +23,10 @@ script:
   
   ver=3
   hg=hg38
-  cutoff=0.99
+  
+  # Changed on 200126 from cutoff=0.99
+  cutoff=0.80
+  
   sub=${sample_id}_Combined
 
   outpath=\$(pwd)
